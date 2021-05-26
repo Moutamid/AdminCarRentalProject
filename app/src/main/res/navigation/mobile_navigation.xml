@@ -17,9 +17,10 @@
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_requests" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/navigation_notifications"-->
-<!--        android:name="com.moutamid.admincarrentalproject.ui.notifications.NotificationsFragment"-->
-<!--        android:label="@string/title_notifications"-->
-<!--        tools:layout="@layout/fragment_notifications" />-->
+    <fragment
+        android:id="@+id/navigation_car_history"
+        android:name="com.moutamid.admincarrentalproject.CarHistoryFragment"
+        android:label="Car history"
+        tools:layout="@layout/fragment_car_history" />
+
 </navigation>

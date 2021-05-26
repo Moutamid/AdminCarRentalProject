@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -127,15 +128,26 @@ public class RequestViewerActivity extends AppCompatActivity {
         // LOAD CAR IMAGE
 
         ImageView imageView = findViewById(R.id.car_image_view_layout_request_viewer);
-        Glide.with(RequestViewerActivity.this)
-                .asBitmap()
-                .load(requestBookingModel.getCarImageUrl())
-                .apply(new RequestOptions()
-                        .placeholder(lighterGrey)
-                        .error(lighterGrey)
-                )
-                .diskCacheStrategy(DATA)
-                .into(imageView);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (!RequestViewerActivity.this.isDestroyed())
+                with(RequestViewerActivity.this)
+                        .asBitmap()
+                        .load(requestBookingModel.getCarImageUrl())
+                        .apply(new RequestOptions()
+                                .placeholder(lighterGrey)
+                                .error(lighterGrey)
+                        )
+                        .diskCacheStrategy(DATA)
+                        .into(imageView);
+        }
+
+        if (getIntent().hasExtra("history")){
+            // SHOWING ONLY HISTORY SO NO ON CLICK LISTENERS NEEDED
+            progressDialog.dismiss();
+            return;
+        }
+
+        findViewById(R.id.bottom_layout_request).setVisibility(View.VISIBLE);
 
         LinearLayout acceptRejectLayout = findViewById(R.id.acceptRejectLayout_request);
         RelativeLayout startStopLayout = findViewById(R.id.startStopLayout_request);
@@ -154,6 +166,44 @@ public class RequestViewerActivity extends AppCompatActivity {
             startStopLayout.setVisibility(View.VISIBLE);
         }
 
+        // CHECK IF TRACKING IS ALREADY STARTED OR NOT
+        databaseReference.child("requests").child(requestBookingModel.getMyUid())
+                .child("tracker_started")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (!snapshot.exists()) {
+                            return;
+                        }
+
+                        final TextView startStopText = findViewById(R.id.start_driving_textview_viewer);
+                        final ImageView gpsImageView = findViewById(R.id.tracker_image_gps_viewer);
+                        boolean value = snapshot.getValue(Boolean.class);
+
+                        if (value) {
+                            // TRACKER_STARTED
+                            startStopLayout.setBackgroundResource(R.drawable.bg_stop_tracker_btn);
+                            startStopText.setText("STOP");
+                            gpsAnimation = YoYo.with(Techniques.Flash).duration(4000).delay(1000).repeat(10000)
+                                    .playOn(gpsImageView);
+                            golden = false;
+
+                        } else {
+                            // TRACKER_STOPPED
+                            startStopLayout.setBackgroundResource(R.drawable.bg_get_started_btn);
+                            startStopText.setText("Start tracker");
+                            gpsAnimation.stop();
+                            golden = true;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(RequestViewerActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // SET ON CLICK LISTENERS ON BOTTOM BUTTONS
         findViewById(R.id.acceptBtn_request).setOnClickListener(acceptBtnClickListeer(requestBookingModel.getMyUid()));
         findViewById(R.id.rejectBtn_request).setOnClickListener(rejectBtnClickListeer(requestBookingModel.getMyUid()));
         startStopLayout.setOnClickListener(startStopLayoutClickListener(requestBookingModel.getMyUid()));

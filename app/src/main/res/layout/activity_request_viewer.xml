@@ -414,6 +414,7 @@
     <RelativeLayout
         android:id="@+id/bottom_layout_request"
         android:layout_width="match_parent"
+        android:visibility="invisible"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
