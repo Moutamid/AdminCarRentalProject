@@ -11,6 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AdminCarRentalProject">
         <activity android:name=".ui.requests.RequestViewerActivity"></activity>
+
         <activity android:name=".ui.home.AddCarActivity" />
         <activity
             android:name=".BottomNavigationActivity"
