@@ -141,7 +141,7 @@ public class RequestViewerActivity extends AppCompatActivity {
                         .into(imageView);
         }
 
-        if (getIntent().hasExtra("history")){
+        if (getIntent().hasExtra("history")) {
             // SHOWING ONLY HISTORY SO NO ON CLICK LISTENERS NEEDED
             progressDialog.dismiss();
             return;
@@ -192,7 +192,8 @@ public class RequestViewerActivity extends AppCompatActivity {
                             // TRACKER_STOPPED
                             startStopLayout.setBackgroundResource(R.drawable.bg_get_started_btn);
                             startStopText.setText("Start tracker");
-                            gpsAnimation.stop();
+                            if (gpsAnimation != null)
+                                gpsAnimation.stop();
                             golden = true;
                         }
                     }
