@@ -29,6 +29,7 @@ import com.moutamid.admincarrentalproject.R;
 
 import static com.bumptech.glide.Glide.with;
 import static com.bumptech.glide.load.engine.DiskCacheStrategy.DATA;
+import static com.moutamid.admincarrentalproject.R.color.error_color_material_light;
 import static com.moutamid.admincarrentalproject.R.color.lighterGrey;
 
 public class RequestViewerActivity extends AppCompatActivity {
@@ -205,9 +206,9 @@ public class RequestViewerActivity extends AppCompatActivity {
                 });
 
         // SET ON CLICK LISTENERS ON BOTTOM BUTTONS
-        findViewById(R.id.acceptBtn_request).setOnClickListener(acceptBtnClickListeer(requestBookingModel.getMyUid()));
-        findViewById(R.id.rejectBtn_request).setOnClickListener(rejectBtnClickListeer(requestBookingModel.getMyUid()));
-        startStopLayout.setOnClickListener(startStopLayoutClickListener(requestBookingModel.getMyUid()));
+        findViewById(R.id.acceptBtn_request).setOnClickListener(acceptBtnClickListeer(requestBookingModel.getMyUid(), requestBookingModel.getCarKey()));
+        findViewById(R.id.rejectBtn_request).setOnClickListener(rejectBtnClickListeer(requestBookingModel.getMyUid(), requestBookingModel.getCarKey()));
+        startStopLayout.setOnClickListener(startStopLayoutClickListener(requestBookingModel.getMyUid(), requestBookingModel.getCarKey()));
 
         progressDialog.dismiss();
 
@@ -216,7 +217,7 @@ public class RequestViewerActivity extends AppCompatActivity {
     private boolean golden = true;
     private YoYo.YoYoString gpsAnimation;
 
-    private View.OnClickListener startStopLayoutClickListener(String myUid) {
+    private View.OnClickListener startStopLayoutClickListener(String myUid, String carKey) {
         final RelativeLayout startStopLayout = findViewById(R.id.startStopLayout_request);
         final TextView startStopText = findViewById(R.id.start_driving_textview_viewer);
         final ImageView gpsImageView = findViewById(R.id.tracker_image_gps_viewer);
@@ -235,7 +236,10 @@ public class RequestViewerActivity extends AppCompatActivity {
 
                     golden = false;
 
-                    databaseReference.child("requests").child(myUid)
+                    databaseReference
+                            .child("cars")
+                            .child(carKey)
+                            .child("booking")
                             .child("tracker_started")
                             .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -250,6 +254,21 @@ public class RequestViewerActivity extends AppCompatActivity {
                         }
                     });
 
+                    databaseReference.child("requests").child(myUid)
+                            .child("tracker_started")
+                            .setValue(true).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+//                            if (!task.isSuccessful()) {
+//                                startStopLayout.setBackgroundResource(R.drawable.bg_get_started_btn);
+//                                startStopText.setText("Start tracker");
+//                                gpsAnimation.stop();
+//                                golden = true;
+//                                Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+//                            }
+                        }
+                    });
+
                 } else {
                     // TRACKER_STOPPED
                     startStopLayout.setBackgroundResource(R.drawable.bg_get_started_btn);
@@ -259,7 +278,10 @@ public class RequestViewerActivity extends AppCompatActivity {
 
                     golden = true;
 
-                    databaseReference.child("requests").child(myUid)
+                    databaseReference
+                            .child("cars")
+                            .child(carKey)
+                            .child("booking")
                             .child("tracker_started")
                             .setValue(false).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -275,17 +297,40 @@ public class RequestViewerActivity extends AppCompatActivity {
                         }
                     });
 
+                    databaseReference.child("requests").child(myUid)
+                            .child("tracker_started")
+                            .setValue(false).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+//                            if (!task.isSuccessful()) {
+//                                startStopLayout.setBackgroundResource(R.drawable.bg_stop_tracker_btn);
+//                                startStopText.setText("STOP");
+//                                gpsAnimation = YoYo.with(Techniques.Flash).duration(4000).delay(1000).repeat(10000)
+//                                        .playOn(gpsImageView);
+//                                golden = false;
+//                                Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+//                            }
+                        }
+                    });
+
                 }
 
             }
         };
     }
 
-    private View.OnClickListener rejectBtnClickListeer(String myUid) {
+    private View.OnClickListener rejectBtnClickListeer(String myUid, String carKey) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressDialog.show();
+
+                databaseReference
+                        .child("cars")
+                        .child(carKey)
+                        .child("booking")
+                        .child("status")
+                        .setValue("rejected");
 
                 databaseReference.child("requests").child(myUid)
                         .child("status")
@@ -303,31 +348,64 @@ public class RequestViewerActivity extends AppCompatActivity {
         };
     }
 
-    private View.OnClickListener acceptBtnClickListeer(String myUid) {
+    private View.OnClickListener acceptBtnClickListeer(String myUid, String carKey) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressDialog.show();
 
-                databaseReference.child("requests").child(myUid)
+                databaseReference
+                        .child("cars")
+                        .child(carKey)
+                        .child("booking")
                         .child("currentMileages")
                         .setValue(0).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
                         if (!task.isSuccessful()) {
                             progressDialog.dismiss();
                             Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         } else {
                             databaseReference.child("requests").child(myUid)
-                                    .child("status")
-                                    .setValue("accepted").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    .child("currentMileages")
+                                    .setValue(0).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
-                                    progressDialog.dismiss();
 
                                     if (!task.isSuccessful()) {
+                                        progressDialog.dismiss();
                                         Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    } else {
+
+                                        databaseReference
+                                                .child("cars")
+                                                .child(carKey)
+                                                .child("booking")
+                                                .child("status")
+                                                .setValue("accepted").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+//                                    progressDialog.dismiss();
+
+                                                if (!task.isSuccessful()) {
+                                                    progressDialog.dismiss();
+                                                    Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    databaseReference.child("requests").child(myUid)
+                                                            .child("status")
+                                                            .setValue("accepted").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            progressDialog.dismiss();
+
+                                                            if (!task.isSuccessful()) {
+                                                                Toast.makeText(RequestViewerActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
                                     }
                                 }
                             });

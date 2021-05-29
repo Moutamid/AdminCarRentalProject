@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -52,6 +53,7 @@ public class AddCarActivity extends AppCompatActivity {
     private boolean gpsValue = false, acValue = false;
 
     private ImageView carImageView;
+
     private EditText nameEditText, modelEditText, seatsEditText,
             rateEditText, descriptionEditText;
     private SwitchCompat acSwitch, gpsSwitch;
@@ -160,6 +162,9 @@ public class AddCarActivity extends AppCompatActivity {
 
         if (engineStr.toLowerCase().equals("gas"))
             engineRadioGroup.check(R.id.radio_btn_gas);
+
+        TextView keyTv = findViewById(R.id.car_key_text_view);
+        keyTv.setText(carKey);
 
         nameEditText.setText(nameStr);
         modelEditText.setText(modelStr);
