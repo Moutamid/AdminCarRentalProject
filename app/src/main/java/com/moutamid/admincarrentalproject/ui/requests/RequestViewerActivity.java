@@ -47,7 +47,7 @@ public class RequestViewerActivity extends AppCompatActivity {
 
         String uid = getIntent().getStringExtra("uid");
 
-        if (getIntent().hasExtra("history")){
+        if (getIntent().hasExtra("history")) {
 //            Toast.makeText(this, "triggered", Toast.LENGTH_SHORT).show();
             databaseReference
                     .child("booking_history")
