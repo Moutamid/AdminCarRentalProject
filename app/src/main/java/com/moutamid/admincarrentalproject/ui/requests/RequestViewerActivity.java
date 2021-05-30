@@ -47,7 +47,56 @@ public class RequestViewerActivity extends AppCompatActivity {
 
         String uid = getIntent().getStringExtra("uid");
 
-        databaseReference.child("requests").child(uid)
+        if (getIntent().hasExtra("history")){
+//            Toast.makeText(this, "triggered", Toast.LENGTH_SHORT).show();
+            databaseReference
+                    .child("booking_history")
+                    .child(uid)
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (!snapshot.exists()) {
+                                progressDialog.dismiss();
+                                Toast.makeText(RequestViewerActivity.this, "No data", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            RequestBookingModel requestBookingModel = snapshot.getValue(RequestBookingModel.class);
+
+                            String startDateString = "25/04/21",
+                                    endDateString = "29/04/21",
+                                    currentMileagesStr = "not started";
+
+                            if (snapshot.child("start_date").exists()) {
+                                startDateString = snapshot.child("start_date").getValue(String.class);
+                            }
+                            if (snapshot.child("end_date").exists()) {
+                                endDateString = snapshot.child("end_date").getValue(String.class);
+                            }
+                            if (snapshot.child("currentMileages").exists()) {
+                                currentMileagesStr = String.valueOf(
+                                        snapshot.child("currentMileages")
+                                                .getValue(Double.class)
+                                );
+                            }
+
+                            setValuesOnViews(requestBookingModel, startDateString, endDateString, currentMileagesStr);
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            progressDialog.dismiss();
+                            Toast.makeText(RequestViewerActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+            return;
+        }
+
+        databaseReference
+                .child("requests")
+                .child(uid)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {

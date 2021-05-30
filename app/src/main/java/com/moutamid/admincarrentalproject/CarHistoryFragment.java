@@ -201,7 +201,7 @@ public class CarHistoryFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), RequestViewerActivity.class);
-                    intent.putExtra("uid", model.getMyUid());
+                    intent.putExtra("uid", model.getPushKey());
                     intent.putExtra("history", "yes");
                     startActivity(intent);
                 }
