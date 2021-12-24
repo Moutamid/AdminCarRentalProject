@@ -175,7 +175,7 @@ public class RequestViewerActivity extends AppCompatActivity {
 
                 int fineValue = (int) aboveMileage * 10;
                 TextView fineTv = findViewById(R.id.fine_cost_viewer);
-                fineTv.setText("+ RM"+fineValue+" FINE");
+                fineTv.setText("+ $"+fineValue+" FINE");
 
                 fineTv.setVisibility(View.VISIBLE);
                 findViewById(R.id.exceeded_mileage_viewer).setVisibility(View.VISIBLE);

@@ -192,7 +192,7 @@ public class HomeFragment extends Fragment {
             if (carModel.isAC())
                 holder.ac.setVisibility(View.VISIBLE);
 
-            holder.price.setText("RM" + carModel.getPerDayRate() + " /Mileage");
+            holder.price.setText("$" + carModel.getPerDayRate() + " /Mileage");
 
             holder.engine.setText(carModel.getEngine());
 
